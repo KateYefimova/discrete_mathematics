@@ -7,14 +7,14 @@ class Program
     {
         int V = 5; // Кількість вершин
         double density = 1; // Щільність
-        Graph graph = new Graph(V, density);
+        Graph graph = new Graph(V, density, Graph.RepresentationType.AdjacencyList);
 
         // Вивід графу
         graph.PrintAdjacencyLists();
         Console.WriteLine();
-        graph.PrintAdjacencyMatrix();
-        Console.WriteLine();
-        Console.WriteLine();
+        //graph.PrintAdjacencyMatrix();
+        //Console.WriteLine();
+        //Console.WriteLine();
         
         List<int> tspPath = BruteForceTSP.BfTravellingSalesman(graph);
 
