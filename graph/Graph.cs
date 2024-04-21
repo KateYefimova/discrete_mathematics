@@ -2,9 +2,9 @@ namespace graph;
 
 public class Graph
 {
-    private int V; // Кількість вершин
-    private List<Tuple<int, int>>[] adj; // Список суміжності
-    private int[,] adjacencyMatrix; // Матриця суміжності
+    public int V; // Кількість вершин
+    public List<Tuple<int, int>>[] adj; // Список суміжності
+    public int[,] adjacencyMatrix; // Матриця суміжності
 
     // Конструктор для створення графу з v вершинами та щільністю density
     public Graph(int v, double density)

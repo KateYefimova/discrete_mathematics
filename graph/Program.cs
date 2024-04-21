@@ -1,5 +1,6 @@
 ﻿using graph;
 
+
 class Program
 {
     static void Main(string[] args)
@@ -12,6 +13,17 @@ class Program
         graph.PrintAdjacencyLists();
         Console.WriteLine();
         graph.PrintAdjacencyMatrix();
+        Console.WriteLine();
+        Console.WriteLine();
         
+        List<int> tspPath = BruteForceTSP.BfTravellingSalesman(graph);
+
+        // Вивід алгоритму найближчих сусідів
+        Console.WriteLine("Travelling Salesman Path:");
+        foreach (int vertex in tspPath)
+        {
+            Console.Write(vertex + " -> ");
+        }
+        Console.WriteLine(tspPath[0]); // Закінчення циклу з початковою вершиною
     }
 }
