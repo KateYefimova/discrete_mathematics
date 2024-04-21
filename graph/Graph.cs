@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace graph
@@ -11,6 +12,7 @@ namespace graph
         }
 
         public int V; // Кількість вершин
+        public int E; // Кількість ребер
         public List<Tuple<int, int>>[] adj; // Список суміжності
         public int[,] adjacencyMatrix; // Матриця суміжності
         public RepresentationType Representation;
@@ -20,6 +22,7 @@ namespace graph
         {
             V = v;
             Representation = representation;
+            E = 0;
 
             if (Representation == RepresentationType.AdjacencyList)
             {
@@ -36,6 +39,7 @@ namespace graph
             }
 
             GenerateRandomGraph(density);
+            GenerateRandomEdges(density);
         }
 
         public void AddEdge(int u, int v, int weight)
@@ -50,6 +54,8 @@ namespace graph
                 adjacencyMatrix[u, v] = weight;
                 adjacencyMatrix[v, u] = weight;
             }
+
+            E++; // Збільшуємо кількість ребер при додаванні нового ребра
         }
 
         private void UpdateAdjacencyMatrix()
@@ -70,13 +76,24 @@ namespace graph
         private void GenerateRandomGraph(double density)
         {
             Random random = new Random();
+            // Створюємо граф з рандомними вагами
+            for (int i = 1; i < V; i++)
+            {
+                int weight = random.Next(1, 101); // Генерація ваги ребра (від 1 до 100)
+                int randomVertex = random.Next(0, i); // Вибираємо випадкову вершину, до якої буде додано ребро
+                AddEdge(i, randomVertex, weight); // Додаємо ребро між поточною вершиною та випадково обраною
+            }
+        }
+
+        private void GenerateRandomEdges(double density)
+        {
+            Random random = new Random();
 
             for (int i = 0; i < V; i++)
             {
                 for (int j = i + 1; j < V; j++)
                 {
-                    if (i != j && random.NextDouble() <
-                        density) // Виключив можливість додавання ребра від вершини до самої себе
+                    if (i != j && random.NextDouble() < density && adjacencyMatrix[i, j] == 0)
                     {
                         int weight = random.Next(1, 101); // Генерація ваги ребра (від 1 до 100)
                         AddEdge(i, j, weight); // Додавання ребра між вершинами i та j

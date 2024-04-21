@@ -8,13 +8,19 @@ class Program
 {
     static void Main(string[] args)
     {
-        int V = 5; // Кількість вершин
+        int V = 200; // Кількість вершин
         double density = 1; // Щільність
         Graph graph = new Graph(V, density, Graph.RepresentationType.AdjacencyMatrix);
 
+        /*if (!BruteForceTSP.IsTSPSolvable(graph))
+        {
+            Console.WriteLine("Задача комівояжера не може бути вирішена для даного графу.");
+            return;
+        }*/
+
         // Вивід графу
-        graph.PrintAdjacencyMatrix();
-        Console.WriteLine();
+        //graph.PrintAdjacencyMatrix();
+        //Console.WriteLine();
 
         // Таймер для вимірювання часу виконання алгоритму
         Stopwatch stopwatch = new Stopwatch();
@@ -35,6 +41,6 @@ class Program
         Console.WriteLine(tspPath[0]); // Закінчення циклу з початковою вершиною
 
         // Вивід часу виконання алгоритму
-        Console.WriteLine("Algorithm execution time: " + stopwatch.ElapsedMilliseconds + " ms");
+        Console.WriteLine("Algorithm execution time: " + (stopwatch.ElapsedMilliseconds / 1000.0) + " seconds");
     }
 }

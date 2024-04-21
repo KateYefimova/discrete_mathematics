@@ -5,46 +5,18 @@ using graph;
 
 public static class BruteForceTSP
 {
+    // Словник для зберігання обчислених шляхів
+    private static Dictionary<Tuple<int, List<int>>, List<List<int>>> memoPaths = new Dictionary<Tuple<int, List<int>>, List<List<int>>>();
+
+    // Головний метод для пошуку оптимального шляху комівояжера
     public static List<int> BfTravellingSalesman(Graph graph)
     {
-        // Шукання вершини з мінімальними відстанями до всіх інших вершин.
         int startVertex = FindMostOptimalStartVertex(graph);
-        
-        // Генерація всіх можливих шляхів, починаючи з вигідної вершини.
-        List<List<int>> allPossiblePaths = FindAllPaths(graph, startVertex);
-
-        // Фільтрація шляхів, які не є циклами.
-        List<List<int>> allPossibleCycles = allPossiblePaths.FindAll(path =>
-        {
-            int lastVertex = path[path.Count - 1];
-            if (graph.Representation == Graph.RepresentationType.AdjacencyList)
-                return graph.adj[lastVertex].Exists(edge => edge.Item1 == startVertex);
-            else
-                return graph.adjacencyMatrix[lastVertex, startVertex] > 0;
-        });
-
-        // Проходження усіх можливих циклів і вибір того, який має мінімальну вагу.
-        List<int> salesmanPath = new List<int>();
-        int? salesmanPathWeight = null;
-
-        foreach (List<int> currentCycle in allPossibleCycles)
-        {
-            int currentCycleWeight = GetCycleWeight(graph, currentCycle);
-
-            // Якщо вага поточного циклу менша за попередні, вважати поточний цикл найоптимальнішим.
-            if (salesmanPathWeight == null || currentCycleWeight < salesmanPathWeight)
-            {
-                salesmanPath = currentCycle;
-                salesmanPathWeight = currentCycleWeight;
-            }
-        }
-
-        // Повернення рішення.
+        List<int> salesmanPath = FindNearestNeighborPath(graph, startVertex);
         return salesmanPath;
     }
 
-    // Знаходження оптимальної вершини початку - обираємо вершину
-    // з якої йдуть найменшої веги ребра до усіх інших вершин
+    // Метод для пошуку найоптимальнішої стартової вершини
     private static int FindMostOptimalStartVertex(Graph graph)
     {
         int mostOptimalVertex = 0;
@@ -78,86 +50,121 @@ public static class BruteForceTSP
         return mostOptimalVertex;
     }
 
-    private static List<List<int>> FindAllPaths(Graph graph, int startVertex, List<List<int>> paths = null, List<int> path = null)
+    // Метод для пошуку шляху за алгоритмом найближчого сусіда
+    private static List<int> FindNearestNeighborPath(Graph graph, int startVertex)
     {
-        if (paths == null)
+        List<int> path = new List<int>();
+        HashSet<int> visited = new HashSet<int>();
+        int currentVertex = startVertex;
+
+        while (visited.Count < graph.V)
         {
-            paths = new List<List<int>>();
-            path = new List<int>();
-        }
+            path.Add(currentVertex);
+            visited.Add(currentVertex);
 
-        List<int> currentPath = new List<int>(path);
-        currentPath.Add(startVertex);
+            int minWeight = int.MaxValue;
+            int nearestNeighbor = -1;
 
-        HashSet<int> visitedSet = new HashSet<int>(currentPath);
-
-        List<int> unvisitedNeighbors = new List<int>();
-        if (graph.Representation == Graph.RepresentationType.AdjacencyList)
-        {
-            foreach (var edge in graph.adj[startVertex])
+            if (graph.Representation == Graph.RepresentationType.AdjacencyList && graph.adj != null)
             {
-                int neighbor = edge.Item1;
-                if (!visitedSet.Contains(neighbor))
+                foreach (var edge in graph.adj[currentVertex])
                 {
-                    unvisitedNeighbors.Add(neighbor);
-                }
-            }
-        }
-        else if (graph.Representation == Graph.RepresentationType.AdjacencyMatrix)
-        {
-            for (int i = 0; i < graph.V; i++)
-            {
-                if (graph.adjacencyMatrix[startVertex, i] > 0 && !visitedSet.Contains(i))
-                {
-                    unvisitedNeighbors.Add(i);
-                }
-            }
-        }
-
-        if (unvisitedNeighbors.Count == 0)
-        {
-            paths.Add(currentPath);
-            return paths;
-        }
-
-        foreach (int currentUnvisitedNeighbor in unvisitedNeighbors)
-        {
-            FindAllPaths(graph, currentUnvisitedNeighbor, paths, currentPath);
-        }
-
-        return paths;
-    }
-
-    private static int GetCycleWeight(Graph graph, List<int> cycle)
-    {
-        int weight = 0;
-
-        if (graph.Representation == Graph.RepresentationType.AdjacencyList)
-        {
-            for (int cycleIndex = 1; cycleIndex < cycle.Count; cycleIndex++)
-            {
-                int fromVertex = cycle[cycleIndex - 1];
-                int toVertex = cycle[cycleIndex];
-                foreach (var edge in graph.adj[fromVertex])
-                {
-                    if (edge.Item1 == toVertex)
+                    int neighbor = edge.Item1;
+                    int weight = edge.Item2;
+                    if (!visited.Contains(neighbor) && weight < minWeight)
                     {
-                        weight += edge.Item2;
+                        minWeight = weight;
+                        nearestNeighbor = neighbor;
+                    }
+                }
+            }
+            else if (graph.Representation == Graph.RepresentationType.AdjacencyMatrix)
+            {
+                for (int i = 0; i < graph.V; i++)
+                {
+                    int weight = graph.adjacencyMatrix[currentVertex, i];
+                    if (!visited.Contains(i) && weight > 0 && weight < minWeight)
+                    {
+                        minWeight = weight;
+                        nearestNeighbor = i;
+                    }
+                }
+            }
+
+            if (nearestNeighbor != -1)
+            {
+                currentVertex = nearestNeighbor;
+            }
+            else
+            {
+                // Якщо немає найближчого сусіда, переходимо до будь-якої невідвіданої вершини
+                foreach (var vertex in Enumerable.Range(0, graph.V))
+                {
+                    if (!visited.Contains(vertex))
+                    {
+                        currentVertex = vertex;
                         break;
                     }
                 }
             }
         }
+
+        // Додавання початкової вершини в кінець шляху, щоб утворити цикл
+        path.Add(startVertex);
+        return path;
+    }
+
+    public static bool IsTSPSolvable(Graph graph)
+    {
+        bool hasEdges = false;
+        if (graph.Representation == Graph.RepresentationType.AdjacencyList)
+        {
+            hasEdges = graph.adj.Any(list => list.Count > 0);
+        }
         else if (graph.Representation == Graph.RepresentationType.AdjacencyMatrix)
         {
-            for (int cycleIndex = 1; cycleIndex < cycle.Count; cycleIndex++)
-            {
-                int fromVertex = cycle[cycleIndex - 1];
-                int toVertex = cycle[cycleIndex];
-                weight += graph.adjacencyMatrix[fromVertex, toVertex];
-            }
+            hasEdges = Enumerable.Range(0, graph.V)
+                .Any(i => Enumerable.Range(0, graph.V)
+                    .Any(j => graph.adjacencyMatrix[i, j] > 0));
         }
 
-        return weight;
+        if (!hasEdges)
+        {
+            Console.WriteLine("Задача комівояжера не може бути вирішена, оскільки граф не має ребер.");
+            return false;
+        }
+
+        // Перевірка зв'язності графу
+        bool[] visited = new bool[graph.V];
+        DFS(graph, 0, visited);
+
+        if (visited.All(v => v))
+        {
+            Console.WriteLine("Задача комівояжера може бути вирішена.");
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Задача комівояжера не може бути вирішена, оскільки граф не є зв'язним.");
+            return false;
+        }
+    }
+
+    private static void DFS(Graph graph, int vertex, bool[] visited)
+    {
+        // Додаткова перевірка наявності adj
+        if (graph.Representation == Graph.RepresentationType.AdjacencyList && graph.adj != null)
+        {
+            visited[vertex] = true;
+
+            foreach (var edge in graph.adj[vertex])
+            {
+                int neighbor = edge.Item1;
+                if (!visited[neighbor])
+                {
+                    DFS(graph, neighbor, visited);
+                }
+            }
+        }
     }
 }
