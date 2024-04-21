@@ -8,8 +8,7 @@ public static class BruteForceTSP
     {
         // Шукання вершини з мінімальними відстанями до всіх інших вершин.
         int startVertex = FindMostOptimalStartVertex(graph);
-
-        // Груба сила.
+        
         // Генерація всіх можливих шляхів, починаючи з вигідної вершини.
         List<List<int>> allPossiblePaths = FindAllPaths(graph, startVertex);
 
@@ -41,6 +40,8 @@ public static class BruteForceTSP
         return salesmanPath;
     }
 
+    // Знаходження оптимальної вершини початку - обираємо вершину
+    // з якої йдуть найменшої веги ребра до усіх інших вершин
     private static int FindMostOptimalStartVertex(Graph graph)
     {
         int mostOptimalVertex = 0;
