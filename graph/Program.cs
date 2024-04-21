@@ -38,9 +38,9 @@ class Program
         {
             Console.Write(vertex + " -> ");
         }
-        Console.WriteLine(tspPath[0]); // Закінчення циклу з початковою вершиною
+        Console.WriteLine(); // Закінчення циклу з початковою вершиною
 
         // Вивід часу виконання алгоритму
-        Console.WriteLine("Algorithm execution time: " + (stopwatch.ElapsedMilliseconds / 1000.0) + " seconds");
+        Console.WriteLine("Algorithm execution time: " + (stopwatch.ElapsedMilliseconds) + " milliseconds");
     }
 }
