@@ -10,12 +10,11 @@ namespace graph
             AdjacencyMatrix
         }
 
-        public int V; // Кількість вершин
-        public List<Tuple<int, int>>[] adj; // Список суміжності
-        public int[,] adjacencyMatrix; // Матриця суміжності
+        public int V; // Number of vertices
+        public List<Tuple<int, int>>[] adj; // Adjacency list
+        public int[,] adjacencyMatrix; // Adjacency matrix
         public RepresentationType Representation;
 
-        // Конструктор для створення графу з v вершинами та щільністю density
         public Graph(int v, double density, RepresentationType representation)
         {
             V = v;
@@ -43,7 +42,7 @@ namespace graph
             if (Representation == RepresentationType.AdjacencyList)
             {
                 adj[u].Add(new Tuple<int, int>(v, weight));
-                adj[v].Add(new Tuple<int, int>(u, weight)); // Для неорієнтованого графу додаємо обидва напрямки
+                adj[v].Add(new Tuple<int, int>(u, weight)); // For undirected graph, add both directions
             }
             else if (Representation == RepresentationType.AdjacencyMatrix)
             {
@@ -60,31 +59,31 @@ namespace graph
                 {
                     if (i != j)
                     {
-                        adjacencyMatrix[i, j] = 0; // Якщо вершина не з'єднана, вага ребра - 0
+                        adjacencyMatrix[i, j] = 0; // If vertex is not connected, edge weight is 0
                     }
                 }
             }
         }
 
-        // Метод для генерації зваженого неорієнтованого повного графу за заданою щільністю
         private void GenerateRandomGraph(double density)
         {
             Random random = new Random();
+            HashSet<Tuple<int, int>> generatedEdges = new HashSet<Tuple<int, int>>();
 
             for (int i = 0; i < V; i++)
             {
                 for (int j = i + 1; j < V; j++)
                 {
-                    if (i != j && random.NextDouble() <
-                        density) // Виключив можливість додавання ребра від вершини до самої себе
+                    if (i != j && random.NextDouble() < density && !generatedEdges.Contains(new Tuple<int, int>(i, j)))
                     {
-                        int weight = random.Next(1, 101); // Генерація ваги ребра (від 1 до 100)
-                        AddEdge(i, j, weight); // Додавання ребра між вершинами i та j
+                        int weight = random.Next(1, 101); // Generate edge weight (from 1 to 100)
+                        AddEdge(i, j, weight); // Add edge between vertices i and j
+                        generatedEdges.Add(new Tuple<int, int>(i, j));
+                        generatedEdges.Add(new Tuple<int, int>(j, i)); // Add reverse edge for undirected graph
                     }
                 }
             }
-        }
-
+        } 
         public void PrintAdjacencyLists()
         {
             Console.WriteLine("Списки суміжності:");

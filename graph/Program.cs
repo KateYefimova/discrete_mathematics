@@ -8,7 +8,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        int V = 5; // Кількість вершин
+        int V = 10; // Кількість вершин
         double density = 1; // Щільність
         Graph graph = new Graph(V, density, Graph.RepresentationType.AdjacencyMatrix);
 
