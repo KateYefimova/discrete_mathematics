@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using graph;
 
 public static class BruteForceTSP
@@ -16,17 +17,19 @@ public static class BruteForceTSP
         List<List<int>> allPossibleCycles = allPossiblePaths.FindAll(path =>
         {
             int lastVertex = path[path.Count - 1];
-            return graph.adj[lastVertex].Exists(edge => edge.Item1 == startVertex);
+            if (graph.Representation == Graph.RepresentationType.AdjacencyList)
+                return graph.adj[lastVertex].Exists(edge => edge.Item1 == startVertex);
+            else
+                return graph.adjacencyMatrix[lastVertex, startVertex] > 0;
         });
 
         // Проходження усіх можливих циклів і вибір того, який має мінімальну вагу.
-        int[,] adjacencyMatrix = graph.adjacencyMatrix;
         List<int> salesmanPath = new List<int>();
         int? salesmanPathWeight = null;
 
         foreach (List<int> currentCycle in allPossibleCycles)
         {
-            int currentCycleWeight = GetCycleWeight(adjacencyMatrix, currentCycle);
+            int currentCycleWeight = GetCycleWeight(graph, currentCycle);
 
             // Якщо вага поточного циклу менша за попередні, вважати поточний цикл найоптимальнішим.
             if (salesmanPathWeight == null || currentCycleWeight < salesmanPathWeight)
@@ -50,9 +53,19 @@ public static class BruteForceTSP
         for (int i = 0; i < graph.V; i++)
         {
             int totalDistance = 0;
-            for (int j = 0; j < graph.V; j++)
+            if (graph.Representation == Graph.RepresentationType.AdjacencyList)
             {
-                totalDistance += graph.adjacencyMatrix[i, j];
+                foreach (var edge in graph.adj[i])
+                {
+                    totalDistance += edge.Item2;
+                }
+            }
+            else if (graph.Representation == Graph.RepresentationType.AdjacencyMatrix)
+            {
+                for (int j = 0; j < graph.V; j++)
+                {
+                    totalDistance += graph.adjacencyMatrix[i, j];
+                }
             }
 
             if (totalDistance < minDistance)
@@ -79,12 +92,25 @@ public static class BruteForceTSP
         HashSet<int> visitedSet = new HashSet<int>(currentPath);
 
         List<int> unvisitedNeighbors = new List<int>();
-        foreach (var edge in graph.adj[startVertex])
+        if (graph.Representation == Graph.RepresentationType.AdjacencyList)
         {
-            int neighbor = edge.Item1;
-            if (!visitedSet.Contains(neighbor))
+            foreach (var edge in graph.adj[startVertex])
             {
-                unvisitedNeighbors.Add(neighbor);
+                int neighbor = edge.Item1;
+                if (!visitedSet.Contains(neighbor))
+                {
+                    unvisitedNeighbors.Add(neighbor);
+                }
+            }
+        }
+        else if (graph.Representation == Graph.RepresentationType.AdjacencyMatrix)
+        {
+            for (int i = 0; i < graph.V; i++)
+            {
+                if (graph.adjacencyMatrix[startVertex, i] > 0 && !visitedSet.Contains(i))
+                {
+                    unvisitedNeighbors.Add(i);
+                }
             }
         }
 
@@ -102,15 +128,34 @@ public static class BruteForceTSP
         return paths;
     }
 
-    private static int GetCycleWeight(int[,] adjacencyMatrix, List<int> cycle)
+    private static int GetCycleWeight(Graph graph, List<int> cycle)
     {
         int weight = 0;
 
-        for (int cycleIndex = 1; cycleIndex < cycle.Count; cycleIndex++)
+        if (graph.Representation == Graph.RepresentationType.AdjacencyList)
         {
-            int fromVertex = cycle[cycleIndex - 1];
-            int toVertex = cycle[cycleIndex];
-            weight += adjacencyMatrix[fromVertex, toVertex];
+            for (int cycleIndex = 1; cycleIndex < cycle.Count; cycleIndex++)
+            {
+                int fromVertex = cycle[cycleIndex - 1];
+                int toVertex = cycle[cycleIndex];
+                foreach (var edge in graph.adj[fromVertex])
+                {
+                    if (edge.Item1 == toVertex)
+                    {
+                        weight += edge.Item2;
+                        break;
+                    }
+                }
+            }
+        }
+        else if (graph.Representation == Graph.RepresentationType.AdjacencyMatrix)
+        {
+            for (int cycleIndex = 1; cycleIndex < cycle.Count; cycleIndex++)
+            {
+                int fromVertex = cycle[cycleIndex - 1];
+                int toVertex = cycle[cycleIndex];
+                weight += graph.adjacencyMatrix[fromVertex, toVertex];
+            }
         }
 
         return weight;

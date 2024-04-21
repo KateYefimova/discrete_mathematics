@@ -75,7 +75,8 @@ namespace graph
             {
                 for (int j = i + 1; j < V; j++)
                 {
-                    if (i != j && random.NextDouble() < density) // Виключив можливість додавання ребра від вершини до самої себе
+                    if (i != j && random.NextDouble() <
+                        density) // Виключив можливість додавання ребра від вершини до самої себе
                     {
                         int weight = random.Next(1, 101); // Генерація ваги ребра (від 1 до 100)
                         AddEdge(i, j, weight); // Додавання ребра між вершинами i та j
@@ -94,6 +95,7 @@ namespace graph
                 {
                     Console.Write(edge.Item1 + "(" + edge.Item2 + ") "); // Item1 - вершина, Item2 - вага ребра
                 }
+
                 Console.WriteLine();
             }
         }
@@ -108,6 +110,7 @@ namespace graph
                 {
                     Console.Write(adjacencyMatrix[i, j] + " ");
                 }
+
                 Console.WriteLine();
             }
         }

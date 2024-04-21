@@ -1,4 +1,7 @@
-﻿using graph;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using graph;
 
 
 class Program
@@ -7,16 +10,21 @@ class Program
     {
         int V = 5; // Кількість вершин
         double density = 1; // Щільність
-        Graph graph = new Graph(V, density, Graph.RepresentationType.AdjacencyList);
+        Graph graph = new Graph(V, density, Graph.RepresentationType.AdjacencyMatrix);
 
         // Вивід графу
-        graph.PrintAdjacencyLists();
+        graph.PrintAdjacencyMatrix();
         Console.WriteLine();
-        //graph.PrintAdjacencyMatrix();
-        //Console.WriteLine();
-        //Console.WriteLine();
-        
+
+        // Таймер для вимірювання часу виконання алгоритму
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        // Виклик алгоритму TSP
         List<int> tspPath = BruteForceTSP.BfTravellingSalesman(graph);
+
+        // Зупинка таймера після виконання алгоритму
+        stopwatch.Stop();
 
         // Вивід алгоритму найближчих сусідів
         Console.WriteLine("Travelling Salesman Path:");
@@ -25,5 +33,8 @@ class Program
             Console.Write(vertex + " -> ");
         }
         Console.WriteLine(tspPath[0]); // Закінчення циклу з початковою вершиною
+
+        // Вивід часу виконання алгоритму
+        Console.WriteLine("Algorithm execution time: " + stopwatch.ElapsedMilliseconds + " ms");
     }
 }
